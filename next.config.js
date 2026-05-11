@@ -1,38 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Output for Netlify Next.js plugin
-  output: 'standalone',
+  // Standard Next.js for Vercel - no static export
+  // Vercel runs the build and serves SSR/SSG automatically
   
-  // Image optimisation
+  reactStrictMode: true,
+  
   images: {
+    // Allow unoptimized for simplicity on Vercel free tier
+    unoptimized: false,
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
-  // Strict mode for catching issues early
-  reactStrictMode: true,
-
-  // No trailing slashes
-  trailingSlash: false,
-
-  // Compiler options
+  // Compiler
   compiler: {
-    // Remove console.log in production
     removeConsole: process.env.NODE_ENV === 'production',
-  },
-
-  // Headers for security
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          { key: 'X-DNS-Prefetch-Control', value: 'on' },
-          { key: 'X-XSS-Protection', value: '1; mode=block' },
-        ],
-      },
-    ]
   },
 }
 

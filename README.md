@@ -1,53 +1,49 @@
-# hālo skincare — Next.js Production Build
+# hālo skincare — Next.js Static Export
 
 ## Quick Start
 
 ```bash
 npm install
-npm run dev
+npm run dev        # Development at localhost:3000
+npm run build      # Production build → creates /out folder
 ```
-
-Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
 ## Deploy to Netlify
 
-### Option A — Netlify UI (recommended)
+### Option A — GitHub → Netlify (recommended, fully automatic)
 
-1. Push this folder to a GitHub repo
-2. Go to [app.netlify.com](https://app.netlify.com)
-3. Click **Add new site → Import an existing project**
-4. Connect GitHub → select your repo
-5. Netlify auto-detects Next.js — settings will be pre-filled:
-   - **Build command:** `npm run build`
-   - **Publish directory:** `.next`
-   - **Plugin:** `@netlify/plugin-nextjs` (auto-installed)
-6. Click **Deploy site**
-7. Your live URL appears in ~2 minutes
-
-### Option B — Netlify CLI
-
+1. Push this folder to GitHub:
 ```bash
-npm install -g netlify-cli
-netlify login
-netlify init
-netlify deploy --prod
+cd halo-nextjs
+git init
+git add .
+git commit -m "hālo — production"
+git remote add origin https://github.com/YOUR-USERNAME/halo-skincare
+git push -u origin main
 ```
 
-### Netlify Build Settings (if manual)
+2. Go to **app.netlify.com → Add new site → Import from GitHub**
+3. Select your repo
+4. Settings are pre-filled from `netlify.toml`:
+   - **Build command:** `npm install && npm run build`
+   - **Publish directory:** `out`
+5. Click **Deploy** — live in ~2 minutes
 
-| Setting | Value |
-|---|---|
-| Base directory | *(leave blank)* |
-| Build command | `npm run build` |
-| Publish directory | `.next` |
-| Node version | `20` |
-| Plugin | `@netlify/plugin-nextjs` |
+### Option B — Manual drag-and-drop (pre-built)
 
-### Custom Domain
+1. Run build locally:
+```bash
+npm install
+npm run build
+```
+2. The `/out` folder is created
+3. Drag the **`out` folder** (not the zip) to **netlify.com/drop**
+4. Live immediately — no build needed
 
-In Netlify dashboard → **Domain management** → Add `haloskincare.co.uk`
+> ⚠️ Do NOT drag the source zip directly. Netlify cannot run `npm build` from a zip drop.
+> You must either: (a) connect via GitHub, or (b) pre-build and drag the `/out` folder.
 
 ---
 
@@ -55,7 +51,7 @@ In Netlify dashboard → **Domain management** → Add `haloskincare.co.uk`
 
 ```
 app/                    # Next.js App Router pages
-  layout.tsx            # Root layout — Navbar, metadata, fonts
+  layout.tsx            # Root layout (Navbar + globals.css)
   page.tsx              # Homepage
   her/page.tsx          # Shop Her
   him/page.tsx          # Shop Him
@@ -63,109 +59,71 @@ app/                    # Next.js App Router pages
   values/page.tsx       # Our Values
   contact/page.tsx      # Contact
   not-found.tsx         # Custom 404
-  sitemap.ts            # Auto-generated sitemap.xml
-  robots.ts             # Auto-generated robots.txt
 
 components/
-  nav/Navbar.tsx        # Navigation (desktop + mobile)
-  ui/ProductCard.tsx    # Product card component
-  ui/Footer.tsx         # Site footer
+  nav/Navbar.tsx        # Navigation — sticky, hide-on-scroll, mobile menu
+  ui/Footer.tsx         # Site footer with newsletter
+  ui/ProductCard.tsx    # Product card with hover reveal
+  ui/ContactForm.tsx    # Contact form (client component)
+  ui/NewsletterForm.tsx # Newsletter signup (client component)
 
 sections/
-  Hero.tsx              # Full-viewport hero (all pages)
+  Hero.tsx              # Full-viewport hero
   StoryHero.tsx         # Section hero (story/values/contact)
-  ProductGrid.tsx       # Product grid layout
+  ProductGrid.tsx       # Product grid with trust signals
   ValueBlock.tsx        # Alternating image/text blocks
 
 lib/
-  products.ts           # All product data
+  products.ts           # Product data
   tokens.ts             # Design tokens
 
 styles/
-  globals.css           # Tailwind base + CSS variables
+  globals.css           # Tailwind + full design system
 
 public/
   images/               # 35 optimised images (WebP + JPG)
-
-netlify.toml            # Netlify deployment configuration
-next.config.js          # Next.js configuration
-tailwind.config.ts      # Brand design system
+  sitemap.xml           # Static sitemap
+  robots.txt            # Static robots
 ```
 
 ---
 
-## Routes
+## Design System
 
-| Route | Page |
+### Colours
+| Token | Value | Usage |
+|---|---|---|
+| `--espresso` | `#181513` | Primary background |
+| `--mocha` | `#211D1A` | Secondary background |
+| `--charcoal` | `#2B2622` | Card backgrounds |
+| `--gold` | `#C9A96E` | Primary accent |
+| `--caramel` | `#B88A5A` | Secondary accent |
+| `--sand` | `#D4AA7A` | Hover states |
+| `--ivory` | `#EDE8E2` | Primary text |
+| `--stone` | `#B0A396` | Secondary text |
+
+### Typography
+| Class | Font | Weight | Use |
+|---|---|---|---|
+| `.t-display` | Cormorant Garamond | 200 | Headlines |
+| `.t-eyebrow` | DM Sans | 300 | Labels |
+| `.t-nav` | DM Sans | 300 | Navigation |
+| `.t-body` | DM Sans | 300 | Body copy |
+| `.t-logo` | Nunito | 700 | Logo mark |
+
+### Buttons
+| Class | Style |
 |---|---|
-| `/` | Homepage |
-| `/her` | Shop Her (4 products) |
-| `/him` | Shop Him (4 products) |
-| `/story` | Our Story |
-| `/values` | Our Values |
-| `/contact` | Contact |
-| `/404` | Custom not-found |
-| `/sitemap.xml` | Auto-generated |
-| `/robots.txt` | Auto-generated |
+| `.btn-primary` | Ghost with cream hover fill |
+| `.btn-secondary` | Subtle ghost |
+| `.btn-link` | Text with gold colour |
+| `.btn-bag` | Cream fill (product CTA) |
 
 ---
 
-## Environment Variables
+## Next Steps After Deployment
 
-Copy `.env.example` to `.env.local`.  
-No environment variables are required for basic deployment.
-
-Optional integrations:
-- **Klaviyo** — email newsletter
-- **Shopify Storefront API** — cart/checkout
-- **Google Analytics** — tracking
-
----
-
-## Why Navigation Works (the original bug, solved)
-
-The old single-file site had `filter:grayscale()` on hero images.  
-CSS `filter` creates a new stacking context — this disrupted click event  
-propagation and made navigation completely non-interactive.
-
-In this Next.js rebuild:
-- `next/image` wraps images with `pointer-events:none` automatically
-- `filter` is applied to the `<img>` element only — no stacking context on parent
-- Navigation uses Next.js `<Link>` — browser routing, zero JavaScript onclick
-- Desktop and mobile nav are completely separate component trees
-- `isolation:isolate` on the nav header
-- `z-index: var(--z-nav)` = 2147483647 — guaranteed top layer
-
----
-
-## Adding Products
-
-Edit `lib/products.ts` — add to the `products` array:
-
-```typescript
-{
-  id:          'your-product-id',
-  name:        'hālo product name',
-  subtitle:    'face · type · usage',
-  description: 'One to two sentences.',
-  price:       28,
-  badge:       'new',          // optional
-  category:    'her',          // 'her' | 'him'
-  type:        'face',
-  image:       '/images/your-image.webp',
-  ingredients: ['ingredient 1', 'ingredient 2'],
-}
-```
-
----
-
-## Next Integration Steps
-
-1. **Shopify** — add Storefront API for real cart/checkout
-2. **Klaviyo** — connect email forms
-3. **Vercel Analytics** or Google Analytics
-4. **Contentful/Sanity** — CMS for copy and product data
-
----
-
-*hālo skincare — the art of radiance*
+1. Connect Shopify Storefront API for real cart
+2. Connect Klaviyo for email newsletter
+3. Add Google Analytics
+4. Set `metadataBase` to live domain in `app/layout.tsx`
