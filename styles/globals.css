@@ -1,0 +1,63 @@
+/* styles/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,200;0,300;1,200;1,300&family=DM+Sans:wght@200;300;400&family=Nunito:wght@800&display=swap');
+
+:root {
+  --espresso:  #181513;
+  --mocha:     #211D1A;
+  --charcoal:  #2B2622;
+  --bronze:    #8A684E;
+  --caramel:   #B88A5A;
+  --sand:      #D6B08A;
+  --cream:     #E7DED4;
+  --dim:       #A89F96;
+  --rule:      rgba(255,255,255,0.06);
+  --z-nav:     2147483647;
+}
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+  body {
+    background-color: var(--espresso);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  a, button, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  img { display: block; max-width: 100%; }
+  .img-overlay { pointer-events: none; user-select: none; }
+  button { cursor: pointer; background: none; border: none; font-family: inherit; }
+  a { color: inherit; text-decoration: none; }
+}
+
+@layer components {
+  .t-display {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 200;
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+  }
+  .t-logo { font-family: 'Nunito', sans-serif; font-weight: 800; letter-spacing: 0.04em; }
+  .t-eyebrow {
+    font-size: 0.52rem; font-weight: 300;
+    letter-spacing: 0.42em; text-transform: uppercase; color: var(--caramel);
+  }
+  .t-nav { font-size: 0.7rem; font-weight: 300; letter-spacing: 0.2em; text-transform: uppercase; }
+  .btn-ghost {
+    @apply inline-flex items-center gap-3 px-9 py-4;
+    @apply text-[0.62rem] font-light tracking-[0.3em] uppercase;
+    @apply text-cream border border-cream/30 transition-all duration-300;
+    @apply hover:border-sand/60 hover:text-sand;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand/40;
+  }
+  .rule-warm { @apply border-b border-white/[0.06]; }
+}
