@@ -1,12 +1,5 @@
 'use client'
 
-// components/nav/Navbar.tsx
-// ─────────────────────────────────────────────────────────────
-// Fully isolated. No inline styles. No legacy CSS.
-// z-index from CSS variable. webkit-tap handled in globals.css.
-// Desktop and mobile are completely separate render trees.
-// ─────────────────────────────────────────────────────────────
-
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect, useCallback, useRef } from 'react'
@@ -19,59 +12,27 @@ const LINKS = [
   { label: 'contact',    href: '/contact' },
 ] as const
 
-// ─── Shared link class builders ───────────────────────────────
-
-function desktopLinkClass(active: boolean): string {
-  return [
-    't-nav transition-colors duration-300 py-2 px-1 block',
-    'rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand/40',
-    active ? 'text-sand' : 'text-cream/60 hover:text-sand',
-  ].join(' ')
-}
-
-function mobileLinkClass(active: boolean): string {
-  return [
-    'block w-full px-6 py-4 t-nav',
-    'border-b border-white/[0.04] transition-colors duration-200',
-    'focus-visible:outline-none focus-visible:bg-charcoal',
-    active
-      ? 'text-sand'
-      : 'text-cream/60 hover:text-sand hover:bg-charcoal/40 active:bg-charcoal',
-  ].join(' ')
-}
-
-// ─── Hamburger icon ───────────────────────────────────────────
-
-function HamburgerIcon({ open }: { open: boolean }) {
-  const base = 'block w-6 h-px bg-cream/70 transition-all duration-300 origin-center'
-  return (
-    <span className="flex flex-col justify-center items-center gap-[6px] w-11 h-11" aria-hidden="true">
-      <span className={`${base} ${open ? 'rotate-45 translate-y-[7px]' : ''}`} />
-      <span className={`${base} ${open ? 'opacity-0 scale-x-0' : ''}`} />
-      <span className={`${base} ${open ? '-rotate-45 -translate-y-[7px]' : ''}`} />
-    </span>
-  )
-}
-
-// ─── Main component ───────────────────────────────────────────
-
 export function Navbar() {
-  const pathname  = usePathname()
-  const [open, setOpen]       = useState(false)
+  const pathname = usePathname()
+  const [open, setOpen]         = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [visible, setVisible]   = useState(true)
+  const lastY = useRef(0)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // Close on route change
   useEffect(() => { setOpen(false) }, [pathname])
 
-  // Scroll detection
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', fn, { passive: true })
-    return () => window.removeEventListener('scroll', fn)
+    const onScroll = () => {
+      const y = window.scrollY
+      setScrolled(y > 40)
+      setVisible(y < lastY.current || y < 100)
+      lastY.current = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Escape key closes menu
   const onKey = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') setOpen(false)
   }, [])
@@ -80,133 +41,213 @@ export function Navbar() {
     return () => document.removeEventListener('keydown', onKey)
   }, [onKey])
 
-  // Lock body scroll when menu open
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [open])
 
-  // Focus trap in mobile menu
   useEffect(() => {
     if (open && menuRef.current) {
-      const first = menuRef.current.querySelector<HTMLElement>('a, button')
-      first?.focus()
+      menuRef.current.querySelector<HTMLElement>('a')?.focus()
     }
   }, [open])
 
   return (
     <>
-      {/* ── HEADER BAR ─────────────────────────────────────────
-          Uses CSS variable for z-index.
-          isolation:isolate keeps stacking context independent.
-          No filter, no transform, no backdrop-filter.
-      */}
+      {/* ── NAVBAR ────────────────────────────────────────────── */}
       <header
         role="banner"
-        className={[
-          'fixed top-0 left-0 right-0',
-          'h-[82px] max-sm:h-[64px]',
-          'flex items-center justify-between',
-          'px-12 max-sm:px-5',
-          'border-b border-white/[0.06]',
-          'transition-colors duration-300',
-          scrolled ? 'bg-espresso' : 'bg-espresso/95',
-          // z-index and isolation via inline CSS var — avoids Tailwind purge issues
-        ].join(' ')}
-        style={{ zIndex: 'var(--z-nav)' as unknown as number, isolation: 'isolate' }}
+        style={{
+          position:    'fixed',
+          top:         0,
+          left:        0,
+          right:       0,
+          zIndex:      9000,
+          isolation:   'isolate',
+          transform:   visible ? 'translateY(0)' : 'translateY(-100%)',
+          transition:  'transform 0.5s cubic-bezier(0.25,0.1,0,1), background-color 0.6s ease',
+          height:      'var(--nav-h)',
+          backgroundColor: scrolled
+            ? 'rgba(24, 21, 19, 0.97)'
+            : 'rgba(24, 21, 19, 0)',
+          borderBottom: scrolled
+            ? '1px solid rgba(255,255,255,0.05)'
+            : '1px solid transparent',
+          backdropFilter: scrolled ? 'blur(12px)' : 'none',
+          WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
+          display:      'flex',
+          alignItems:   'center',
+          justifyContent: 'space-between',
+          paddingLeft:  'clamp(1.5rem, 5vw, 5rem)',
+          paddingRight: 'clamp(1.5rem, 5vw, 5rem)',
+        }}
       >
         {/* Logo */}
         <Link
           href="/"
-          className="t-logo text-[1.35rem] text-sand/70 hover:text-sand transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand/40 rounded-sm"
           aria-label="hālo — home"
+          style={{
+            fontFamily:    "'Nunito', sans-serif",
+            fontWeight:    700,
+            fontSize:      'clamp(1.35rem, 2.5vw, 1.7rem)',
+            letterSpacing: '0.04em',
+            color:         'rgba(201, 169, 110, 0.85)',
+            transition:    'color 0.4s ease',
+            lineHeight:    1,
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#D4AA7A' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(201, 169, 110, 0.85)' }}
         >
           hālo
         </Link>
 
-        {/* ── DESKTOP NAV ── hidden on mobile */}
-        <nav role="navigation" aria-label="Main navigation" className="hidden md:block">
-          <ul role="list" className="flex items-center gap-8">
-            {LINKS.map(({ label, href }) => (
-              <li key={href} role="listitem">
-                <Link
-                  href={href}
-                  className={desktopLinkClass(pathname === href)}
-                  aria-current={pathname === href ? 'page' : undefined}
-                >
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        {/* Desktop navigation */}
+        <nav
+          role="navigation"
+          aria-label="Main navigation"
+          style={{ display: 'none' }}
+          className="md:!flex items-center gap-10"
+        >
+          {LINKS.map(({ label, href }) => {
+            const active = pathname === href
+            return (
+              <Link
+                key={href}
+                href={href}
+                className="t-nav"
+                style={{
+                  color: active
+                    ? 'rgba(212, 170, 122, 0.9)'
+                    : undefined,
+                  paddingBottom: '2px',
+                  borderBottom: active
+                    ? '1px solid rgba(201, 169, 110, 0.4)'
+                    : '1px solid transparent',
+                }}
+                aria-current={active ? 'page' : undefined}
+              >
+                {label}
+              </Link>
+            )
+          })}
         </nav>
 
-        {/* ── HAMBURGER ── visible on mobile only */}
+        {/* Mobile hamburger */}
         <button
           type="button"
-          className="md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand/40 rounded-sm"
-          onClick={() => setOpen(prev => !prev)}
+          className="md:hidden"
+          onClick={() => setOpen(p => !p)}
           aria-label={open ? 'Close menu' : 'Open menu'}
           aria-expanded={open}
           aria-controls="mobile-nav"
+          style={{
+            display:        'flex',
+            flexDirection:  'column',
+            alignItems:     'center',
+            justifyContent: 'center',
+            gap:            '5px',
+            width:          '44px',
+            height:         '44px',
+            padding:        '8px',
+          }}
         >
-          <HamburgerIcon open={open} />
+          {[0, 1, 2].map(i => (
+            <span
+              key={i}
+              style={{
+                display:         'block',
+                width:           '22px',
+                height:          '1px',
+                backgroundColor: 'rgba(237, 232, 226, 0.75)',
+                transformOrigin: 'center',
+                transition:      'all 0.4s cubic-bezier(0.25,0.1,0,1)',
+                transform: open
+                  ? i === 0 ? 'rotate(45deg) translateY(6px)'
+                  : i === 1 ? 'scaleX(0) opacity(0)'
+                  : 'rotate(-45deg) translateY(-6px)'
+                  : 'none',
+                opacity: open && i === 1 ? 0 : 1,
+              }}
+            />
+          ))}
         </button>
       </header>
 
-      {/* ── MOBILE MENU ────────────────────────────────────────
-          Completely separate from desktop nav.
-          Own z-index, own positioning, own animation.
-          Backdrop closes menu on click.
-      */}
-      {open && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-espresso/80 md:hidden"
-            style={{ zIndex: 'calc(var(--z-nav) - 1)' as unknown as number }}
-            onClick={() => setOpen(false)}
-            aria-hidden="true"
-          />
+      {/* ── MOBILE MENU ───────────────────────────────────────── */}
+      <div
+        id="mobile-nav"
+        ref={menuRef}
+        role="navigation"
+        aria-label="Mobile navigation"
+        aria-hidden={!open}
+        className="md:hidden"
+        style={{
+          position:        'fixed',
+          top:             0,
+          left:            0,
+          right:           0,
+          bottom:          0,
+          zIndex:          8999,
+          backgroundColor: 'rgba(14, 12, 10, 0.98)',
+          display:         'flex',
+          flexDirection:   'column',
+          alignItems:      'center',
+          justifyContent:  'center',
+          gap:             '0',
+          opacity:         open ? 1 : 0,
+          pointerEvents:   open ? 'auto' : 'none',
+          transition:      'opacity 0.5s ease',
+        }}
+      >
+        {LINKS.map(({ label, href }, i) => {
+          const active = pathname === href
+          return (
+            <Link
+              key={href}
+              href={href}
+              onClick={() => setOpen(false)}
+              aria-current={active ? 'page' : undefined}
+              style={{
+                fontFamily:    "'Cormorant Garamond', serif",
+                fontWeight:    200,
+                fontSize:      'clamp(2.2rem, 8vw, 3.5rem)',
+                letterSpacing: '-0.02em',
+                color:         active
+                  ? 'rgba(212, 170, 122, 0.9)'
+                  : 'rgba(237, 232, 226, 0.72)',
+                lineHeight:    1.1,
+                padding:       '0.6rem 2rem',
+                transition:    `color 0.4s ease, opacity 0.6s ease ${i * 0.06}s`,
+                opacity:       open ? 1 : 0,
+                transform:     open ? 'translateY(0)' : 'translateY(10px)',
+              }}
+            >
+              {label}
+            </Link>
+          )
+        })}
 
-          {/* Panel */}
-          <div
-            id="mobile-nav"
-            ref={menuRef}
-            role="navigation"
-            aria-label="Mobile navigation"
-            className="fixed left-0 right-0 top-[64px] md:hidden bg-mocha rule-warm animate-[fadeSlideDown_0.2s_ease_forwards]"
-            style={{ zIndex: 'calc(var(--z-nav) - 1)' as unknown as number }}
-          >
-            <style>{`
-              @keyframes fadeSlideDown {
-                from { opacity:0; transform:translateY(-8px) }
-                to   { opacity:1; transform:translateY(0) }
-              }
-            `}</style>
+        {/* Tagline */}
+        <p
+          style={{
+            position:      'absolute',
+            bottom:        '2.5rem',
+            fontFamily:    "'DM Sans', sans-serif",
+            fontSize:      '0.58rem',
+            fontWeight:    300,
+            letterSpacing: '0.34em',
+            textTransform: 'uppercase',
+            color:         'rgba(237, 232, 226, 0.2)',
+            opacity:       open ? 1 : 0,
+            transition:    'opacity 0.8s ease 0.4s',
+          }}
+        >
+          the art of radiance
+        </p>
+      </div>
 
-            <ul role="list" className="py-2">
-              {LINKS.map(({ label, href }) => (
-                <li key={href} role="listitem">
-                  <Link
-                    href={href}
-                    onClick={() => setOpen(false)}
-                    className={mobileLinkClass(pathname === href)}
-                    aria-current={pathname === href ? 'page' : undefined}
-                  >
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-
-            <p className="px-6 py-4 t-eyebrow opacity-40">the art of radiance</p>
-          </div>
-        </>
-      )}
-
-      {/* Spacer — pushes content below fixed header */}
-      <div className="h-[82px] max-sm:h-[64px]" aria-hidden="true" />
+      {/* Spacer */}
+      <div style={{ height: 'var(--nav-h)' }} aria-hidden="true" />
     </>
   )
 }

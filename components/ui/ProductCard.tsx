@@ -1,71 +1,175 @@
-// components/ui/ProductCard.tsx
 import Image from 'next/image'
 import type { Product } from '@/lib/products'
 
 interface Props {
-  product: Product
+  product:   Product
   priority?: boolean
 }
 
 export function ProductCard({ product, priority = false }: Props) {
   return (
-    <article
-      className="group relative flex flex-col"
-      aria-label={product.name}
-    >
-      {/* Image */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-charcoal mb-5">
+    <article className="product-card" aria-label={product.name}>
+
+      {/* Image container */}
+      <div
+        className="product-card__image"
+        style={{ aspectRatio: '3 / 4', marginBottom: '1.5rem' }}
+      >
         <Image
           src={product.image}
           alt={product.name}
           fill
           priority={priority}
-          sizes="(max-width:768px) 100vw, 33vw"
-          className="object-cover grayscale contrast-[1.05] brightness-[0.75] transition-all duration-700 group-hover:grayscale-0 group-hover:brightness-[0.65] group-hover:scale-[1.04]"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          style={{
+            objectFit:      'cover',
+            objectPosition: 'center 15%',
+            filter:         'grayscale(100%) contrast(1.04) brightness(0.58)',
+            transition:     'filter 0.9s cubic-bezier(0.25,0.1,0,1), transform 1s cubic-bezier(0.25,0.1,0,1)',
+          }}
+          className="product-card__img"
         />
+        <div className="product-card__overlay" />
+
+        {/* Badge */}
         {product.badge && (
-          <span className="absolute top-4 left-4 t-eyebrow bg-espresso/90 px-3 py-1.5">
+          <span
+            style={{
+              position:      'absolute',
+              top:           '1.25rem',
+              left:          '1.25rem',
+              fontFamily:    "'DM Sans', sans-serif",
+              fontSize:      '0.55rem',
+              fontWeight:    300,
+              letterSpacing: '0.28em',
+              textTransform: 'uppercase',
+              color:         'rgba(212, 170, 122, 0.9)',
+              padding:       '0.4rem 0.75rem',
+              border:        '1px solid rgba(201, 169, 110, 0.25)',
+              backgroundColor: 'rgba(24, 21, 19, 0.75)',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
             {product.badge}
           </span>
         )}
       </div>
 
       {/* Info */}
-      <div className="flex flex-col flex-1">
-        <p className="t-eyebrow mb-2">{product.subtitle}</p>
-        <h3 className="font-display text-[1.25rem] font-light text-cream leading-snug mb-2">
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: '0.5rem' }}>
+
+        {/* Subtitle */}
+        <p
+          style={{
+            fontFamily:    "'DM Sans', sans-serif",
+            fontSize:      '0.56rem',
+            fontWeight:    300,
+            letterSpacing: '0.28em',
+            textTransform: 'uppercase',
+            color:         'rgba(212, 170, 122, 0.65)',
+          }}
+        >
+          {product.subtitle}
+        </p>
+
+        {/* Name */}
+        <h3
+          style={{
+            fontFamily:    "'Cormorant Garamond', Georgia, serif",
+            fontWeight:    300,
+            fontSize:      'clamp(1.1rem, 2vw, 1.35rem)',
+            lineHeight:    1.15,
+            letterSpacing: '-0.01em',
+            color:         'rgba(237, 232, 226, 0.9)',
+          }}
+        >
           {product.name}
         </h3>
-        <p className="text-[0.82rem] text-cream/55 leading-[1.8] mb-4 flex-1">
+
+        {/* Description */}
+        <p
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize:   '0.82rem',
+            fontWeight: 300,
+            lineHeight: 1.75,
+            color:      'rgba(237, 232, 226, 0.45)',
+            flexGrow:   1,
+            marginTop:  '0.25rem',
+          }}
+        >
           {product.description}
         </p>
 
         {/* Ingredients */}
-        <div className="flex flex-wrap gap-1.5 mb-5">
+        <div
+          style={{
+            display:   'flex',
+            flexWrap:  'wrap',
+            gap:       '0.5rem',
+            marginTop: '0.75rem',
+          }}
+        >
           {product.ingredients.map(ing => (
             <span
               key={ing}
-              className="text-[0.48rem] tracking-[0.22em] uppercase text-bronze/70 border border-bronze/20 px-2 py-1"
+              style={{
+                fontFamily:    "'DM Sans', sans-serif",
+                fontSize:      '0.5rem',
+                fontWeight:    300,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                color:         'rgba(176, 163, 150, 0.55)',
+                border:        '1px solid rgba(176, 163, 150, 0.12)',
+                padding:       '0.3rem 0.65rem',
+              }}
             >
               {ing}
             </span>
           ))}
         </div>
 
-        {/* Price + CTA */}
-        <div className="flex items-center justify-between">
-          <span className="font-display text-[1.1rem] font-light text-cream/80">
+        {/* Price and CTA */}
+        <div
+          style={{
+            display:        'flex',
+            alignItems:     'center',
+            justifyContent: 'space-between',
+            marginTop:      '1.25rem',
+            paddingTop:     '1.25rem',
+            borderTop:      '1px solid rgba(255,255,255,0.05)',
+          }}
+        >
+          <span
+            style={{
+              fontFamily:    "'Cormorant Garamond', serif",
+              fontWeight:    300,
+              fontSize:      '1.2rem',
+              letterSpacing: '0.02em',
+              color:         'rgba(216, 208, 198, 0.8)',
+            }}
+          >
             £{product.price}
           </span>
+
           <button
             type="button"
-            className="text-[0.58rem] tracking-[0.26em] uppercase text-cream/60 border border-cream/18 px-5 py-2.5 transition-all duration-300 hover:border-sand/50 hover:text-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand/40"
-            aria-label={`Add ${product.name} to bag`}
+            className="btn-bag"
+            style={{ width: 'auto', padding: '0.7rem 1.5rem' }}
+            aria-label={`Add ${product.name} to bag — £${product.price}`}
           >
             add to bag
           </button>
         </div>
       </div>
+
+      {/* Hover styles via CSS injection */}
+      <style>{`
+        .product-card:hover .product-card__img {
+          filter: grayscale(0%) contrast(1.0) brightness(0.65) !important;
+          transform: scale(1.03) !important;
+        }
+      `}</style>
     </article>
   )
 }

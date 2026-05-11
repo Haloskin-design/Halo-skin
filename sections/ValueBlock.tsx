@@ -1,39 +1,125 @@
-// sections/ValueBlock.tsx — alternating image/text layout
 import Image from 'next/image'
 
 interface Props {
-  number:   string
-  title:    string
-  body:     string
-  imageSrc: string
-  imageAlt: string
-  flip?:    boolean
+  number:          string
+  title:           string
+  body:            string
+  imageSrc:        string
+  imageAlt:        string
+  flip?:           boolean
+  objectPosition?: string
 }
 
-export function ValueBlock({ number, title, body, imageSrc, imageAlt, flip = false }: Props) {
+export function ValueBlock({
+  number,
+  title,
+  body,
+  imageSrc,
+  imageAlt,
+  flip            = false,
+  objectPosition  = 'center center',
+}: Props) {
   return (
-    <div className={`grid grid-cols-2 max-sm:grid-cols-1 min-h-[520px] max-sm:min-h-0 border-b border-white/[0.06] ${flip ? '' : ''}`}>
-
-      {/* Image side */}
-      <div className={`relative overflow-hidden min-h-[420px] max-sm:h-[50vw] img-overlay ${flip ? 'order-last max-sm:order-first' : ''}`}>
+    <div
+      style={{
+        display:             'grid',
+        gridTemplateColumns: '1fr 1fr',
+        minHeight:           'clamp(400px, 55vw, 620px)',
+        borderBottom:        '1px solid rgba(255,255,255,0.05)',
+      }}
+      className="grid-cols-1 md:!grid-cols-2"
+    >
+      {/* Image */}
+      <div
+        style={{
+          position:  'relative',
+          overflow:  'hidden',
+          minHeight: 'clamp(280px, 40vw, 520px)',
+          order:     flip ? 2 : 1,
+          pointerEvents: 'none',
+        }}
+        className={flip ? 'order-2 md:order-2' : 'order-1 md:order-1'}
+      >
         <Image
           src={imageSrc}
           alt={imageAlt}
           fill
-          sizes="(max-width:640px) 100vw, 50vw"
-          className="object-cover grayscale contrast-[1.06] brightness-[0.55] transition-all duration-700 hover:brightness-[0.45]"
+          sizes="(max-width: 768px) 100vw, 50vw"
+          style={{
+            objectFit:      'cover',
+            objectPosition: objectPosition,
+            filter:         'grayscale(100%) contrast(1.05) brightness(0.48)',
+            transition:     'filter 0.9s cubic-bezier(0.25,0.1,0,1)',
+          }}
+        />
+        {/* Subtle inner vignette */}
+        <div
+          style={{
+            position:      'absolute',
+            inset:         0,
+            pointerEvents: 'none',
+            background:    flip
+              ? 'linear-gradient(to right, transparent 60%, rgba(24,21,19,0.4) 100%)'
+              : 'linear-gradient(to left, transparent 60%, rgba(24,21,19,0.4) 100%)',
+          }}
         />
       </div>
 
-      {/* Text side */}
-      <div className={`flex flex-col justify-center px-16 py-20 max-lg:px-10 max-sm:px-6 max-sm:py-12 ${flip ? 'order-first max-sm:order-last' : ''}`}>
-        <span className="font-display text-[4rem] font-light text-cream/8 leading-none mb-6 select-none" aria-hidden="true">
+      {/* Text */}
+      <div
+        style={{
+          display:        'flex',
+          flexDirection:  'column',
+          justifyContent: 'center',
+          paddingTop:     'clamp(3rem, 6vw, 6rem)',
+          paddingBottom:  'clamp(3rem, 6vw, 6rem)',
+          paddingLeft:    flip ? 'clamp(1.5rem, 5vw, 5rem)' : 'clamp(2.5rem, 7vw, 7rem)',
+          paddingRight:   flip ? 'clamp(2.5rem, 7vw, 7rem)' : 'clamp(1.5rem, 5vw, 5rem)',
+          order:          flip ? 1 : 2,
+        }}
+        className={flip ? 'order-1 md:order-1' : 'order-2 md:order-2'}
+      >
+        {/* Large decorative number */}
+        <span
+          aria-hidden="true"
+          style={{
+            fontFamily:    "'Cormorant Garamond', serif",
+            fontSize:      'clamp(3.5rem, 8vw, 7rem)',
+            fontWeight:    200,
+            color:         'rgba(255,255,255,0.04)',
+            lineHeight:    1,
+            marginBottom:  '1rem',
+            userSelect:    'none',
+            display:       'block',
+          }}
+        >
           {number}
         </span>
-        <h3 className="font-display text-[clamp(1.6rem,3vw,2.6rem)] font-light text-cream leading-[0.95] mb-6">
+
+        <h3
+          style={{
+            fontFamily:    "'Cormorant Garamond', Georgia, serif",
+            fontWeight:    200,
+            fontSize:      'clamp(1.6rem, 3vw, 2.6rem)',
+            lineHeight:    0.95,
+            letterSpacing: '-0.02em',
+            color:         'rgba(237, 232, 226, 0.9)',
+            marginBottom:  '1.5rem',
+          }}
+        >
           {title}
         </h3>
-        <p className="text-[0.85rem] font-light leading-[1.95] text-cream/60 max-w-md">
+
+        <p
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize:   '0.875rem',
+            fontWeight: 300,
+            lineHeight: 1.9,
+            color:      'rgba(237, 232, 226, 0.48)',
+            maxWidth:   '420px',
+          }}
+        >
           {body}
         </p>
       </div>

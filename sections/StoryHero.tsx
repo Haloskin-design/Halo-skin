@@ -1,56 +1,123 @@
-// sections/StoryHero.tsx — reused on story, values, contact pages
 import Image from 'next/image'
 
-interface Props {
-  eyebrow:        string
-  heading:        string
-  sub:            string
-  imageSrc:       string
-  imageAlt?:      string
+interface StoryHeroProps {
+  eyebrow:         string
+  headingLine1:    string
+  headingLine2:    string
+  sub:             string
+  imageSrc:        string
+  imageAlt?:       string
   objectPosition?: string
+  height?:         string
 }
 
 export function StoryHero({
   eyebrow,
-  heading,
+  headingLine1,
+  headingLine2,
   sub,
   imageSrc,
-  imageAlt = '',
-  objectPosition = 'center center',
-}: Props) {
+  imageAlt        = '',
+  objectPosition  = 'center center',
+  height          = '65vh',
+}: StoryHeroProps) {
   return (
-    <section className="relative w-full h-[72vh] min-h-[480px] max-sm:h-[60vh] flex items-end overflow-hidden" aria-label={eyebrow}>
+    <section
+      aria-label={eyebrow}
+      style={{
+        position:   'relative',
+        width:      '100%',
+        height:     height,
+        minHeight:  '400px',
+        maxHeight:  '680px',
+        display:    'flex',
+        alignItems: 'flex-end',
+        overflow:   'hidden',
+      }}
+    >
       {/* Image */}
-      <div className="absolute inset-0 img-overlay" aria-hidden="true">
+      <div
+        aria-hidden="true"
+        style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+      >
         <Image
           src={imageSrc}
           alt={imageAlt}
           fill
           priority
           sizes="100vw"
-          className="object-cover grayscale contrast-[1.08] brightness-[0.48]"
-          style={{ objectPosition }}
+          style={{
+            objectFit:      'cover',
+            objectPosition: objectPosition,
+            filter:         'grayscale(100%) contrast(1.05) brightness(0.4)',
+          }}
         />
       </div>
 
       {/* Gradient */}
       <div
-        className="absolute inset-0 img-overlay"
         aria-hidden="true"
         style={{
-          background: 'linear-gradient(to top, rgba(24,21,19,1) 0%, rgba(24,21,19,0.65) 30%, rgba(24,21,19,0.1) 70%, transparent 100%)',
+          position:      'absolute',
+          inset:         0,
+          pointerEvents: 'none',
+          background:    'linear-gradient(to top, rgba(24,21,19,1) 0%, rgba(24,21,19,0.75) 25%, rgba(24,21,19,0.15) 60%, transparent 100%)',
         }}
       />
 
       {/* Content */}
-      <div className="relative z-10 px-12 pb-16 max-sm:px-6 max-sm:pb-12 w-full">
-        <p className="t-eyebrow mb-4">{eyebrow}</p>
+      <div
+        style={{
+          position:     'relative',
+          zIndex:       2,
+          width:        '100%',
+          paddingLeft:  'clamp(1.5rem, 5vw, 5rem)',
+          paddingRight: 'clamp(1.5rem, 5vw, 5rem)',
+          paddingBottom: 'clamp(2.5rem, 5vw, 4.5rem)',
+        }}
+      >
+        <p
+          style={{
+            fontFamily:    "'DM Sans', sans-serif",
+            fontSize:      '0.58rem',
+            fontWeight:    300,
+            letterSpacing: '0.36em',
+            textTransform: 'uppercase',
+            color:         'rgba(212, 170, 122, 0.7)',
+            marginBottom:  '1.25rem',
+          }}
+        >
+          {eyebrow}
+        </p>
+
         <h1
-          className="font-display font-light text-cream leading-[0.92] tracking-[-0.02em] mb-5"
-          style={{ fontSize: 'clamp(2.4rem, 5vw, 4.4rem)' }}
-          dangerouslySetInnerHTML={{ __html: heading }}
-        />
-        <p className="text-[0.85rem] font-light tracking-[0.06em] text-cream/60 max-w-md">
+          style={{
+            fontFamily:    "'Cormorant Garamond', Georgia, serif",
+            fontWeight:    200,
+            lineHeight:    0.92,
+            letterSpacing: '-0.03em',
+            fontSize:      'clamp(2.4rem, 5vw, 4.8rem)',
+            color:         'rgba(237, 232, 226, 0.95)',
+            marginBottom:  '1.25rem',
+          }}
+        >
+          {headingLine1}
+          <br />
+          <em style={{ fontStyle: 'italic', color: 'rgba(237, 232, 226, 0.45)' }}>
+            {headingLine2}
+          </em>
+        </h1>
+
+        <p
+          style={{
+            fontFamily:    "'DM Sans', sans-serif",
+            fontSize:      '0.82rem',
+            fontWeight:    300,
+            letterSpacing: '0.06em',
+            color:         'rgba(237, 232, 226, 0.48)',
+            maxWidth:      '460px',
+          }}
+        >
           {sub}
         </p>
       </div>
